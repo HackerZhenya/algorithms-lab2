@@ -11,7 +11,7 @@ namespace algorithms_lab2.ast.lexer
         Divide,
         Power,
         Eq,
-        
+
         Comma,
 
         Lparen,

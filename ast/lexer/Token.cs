@@ -11,7 +11,9 @@ namespace algorithms_lab2.ast.lexer
             Value = value;
         }
 
-        public Token(TokenType type, char value) : this(type, value.ToString()) {}
+        public Token(TokenType type, char value) : this(type, value.ToString())
+        {
+        }
 
         public override bool Equals(object obj)
         {

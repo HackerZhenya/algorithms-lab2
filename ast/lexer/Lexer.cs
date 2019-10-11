@@ -6,109 +6,126 @@ using algorithms_lab2.utils;
 
 namespace algorithms_lab2.ast.lexer
 {
+    using Expression = List<Token>;
+
     public class Lexer
     {
         readonly StreamReader stream;
 
-        public Lexer(string path) : this(new FileStream(path, FileMode.Open, FileAccess.Read)) {}
+        public Lexer(string path) : this(new FileStream(path, FileMode.Open, FileAccess.Read))
+        {
+        }
+
         public Lexer(Stream stream) => this.stream = new StreamReader(stream);
+
+        void Dump(List<Expression> expressions)
+        {
+            Console.WriteLine("Lexems:");
+            foreach (var expression in expressions)
+            {
+                foreach (var token in expression)
+                    Console.Write(token.ToString() + ' ');
+
+                Console.WriteLine();
+            }
+        }
 
         public List<Expression> Tokenize()
         {
             var expressions = new List<Expression>();
 
-            while (!stream.EndOfStream) 
-	            TokenizeExpression().AddTo(expressions);
+            while (!stream.EndOfStream)
+                TokenizeExpression().AddTo(expressions);
 
-            return expressions;
+            return expressions.Apply(Dump);
         }
-        
-	    Expression TokenizeExpression()
+
+        Expression TokenizeExpression()
         {
-	        var tokens = new List<Token>();
+            var tokens = new List<Token>();
 
-	        while (stream.Peek() != '\n' && !stream.EndOfStream)
-	        {
-		        char ch = (char) stream.Peek();
+            while (stream.Peek() != '\n' && !stream.EndOfStream)
+            {
+                char ch = (char) stream.Peek();
 
-		        if (char.IsDigit(ch))
-			        TokenizeNumber().AddTo(tokens);
-		        
-		        else if (Utils.IsOperator(ch))
-			        TokenizeOperator().AddTo(tokens);
-		        
-		        else if (char.IsLetterOrDigit(ch))
-			        TokenizeWord().AddTo(tokens);
+                if (char.IsDigit(ch))
+                    TokenizeNumber().AddTo(tokens);
 
-		        else
-			        stream.Read();
-	        }
+                else if (Utils.IsOperator(ch))
+                    TokenizeOperator().AddTo(tokens);
 
-	        stream.Read();
-	        return tokens.ToExpression();
+                else if (char.IsLetterOrDigit(ch))
+                    TokenizeWord().AddTo(tokens);
+
+                else
+                    stream.Read();
+            }
+
+            stream.Read();
+            return tokens;
         }
 
-	    Token TokenizeNumber()
-	    {
-		    var sb = new StringBuilder();
-		    bool dot = false;
-	        while (char.IsDigit((char) stream.Peek()) || stream.Peek() == '.')
-	        {
-		        if (stream.Peek() == '.') 
-			        dot = !dot ? true : throw new ArgumentException("Invalid number");
+        Token TokenizeNumber()
+        {
+            var sb = new StringBuilder();
+            bool dot = false;
+            while (char.IsDigit((char) stream.Peek()) || stream.Peek() == '.')
+            {
+                if (stream.Peek() == '.')
+                    dot = !dot ? true : throw new ArgumentException("Invalid number");
 
-		        sb.Append((char) stream.Read());
-	        }
-	        
-	        return new Token(TokenType.Number, sb.ToString());
+                sb.Append((char) stream.Read());
+            }
+
+            return new Token(TokenType.Number, sb.ToString());
         }
-	    
-	    Token TokenizeOperator()
-	    {
-		    char op = (char) stream.Read();
 
-		    switch (op)
-		    {
-			    case '+':
-				    return new Token(TokenType.Plus, op);
-			    
-			    case '-':
-				    return new Token(TokenType.Minus, op);
-			    
-			    case '*':
-				    return new Token(TokenType.Multiply, op);
-			    
-			    case '/':
-			    case ':':
-				    return new Token(TokenType.Divide, op);
-			    
-			    case '^':
-				    return new Token(TokenType.Power, op);
-			    
-			    case '(':
-				    return new Token(TokenType.Lparen, op);
-			    
-			    case ')':
-				    return new Token(TokenType.Rparen, op);
-			    
-			    case ',':
-				    return new Token(TokenType.Comma, op);	
-			    
-			    case '=':
-				    return new Token(TokenType.Eq, op);
+        Token TokenizeOperator()
+        {
+            char op = (char) stream.Read();
 
-			    default:
-				    throw new ArgumentOutOfRangeException($"Undefined operator: \"{op}\"");
-		    }
-	    }
-	    
-	    Token TokenizeWord()
-	    {
-		    var sb = new StringBuilder();
-		    while (char.IsLetterOrDigit((char) stream.Peek())) 
-			    sb.Append((char) stream.Read());
+            switch (op)
+            {
+                case '+':
+                    return new Token(TokenType.Plus, op);
 
-		    return new Token(TokenType.Word, sb.ToString());
-	    }
+                case '-':
+                    return new Token(TokenType.Minus, op);
+
+                case '*':
+                    return new Token(TokenType.Multiply, op);
+
+                case '/':
+                case ':':
+                    return new Token(TokenType.Divide, op);
+
+                case '^':
+                    return new Token(TokenType.Power, op);
+
+                case '(':
+                    return new Token(TokenType.Lparen, op);
+
+                case ')':
+                    return new Token(TokenType.Rparen, op);
+
+                case ',':
+                    return new Token(TokenType.Comma, op);
+
+                case '=':
+                    return new Token(TokenType.Eq, op);
+
+                default:
+                    throw new ArgumentOutOfRangeException($"Undefined operator: \"{op}\"");
+            }
+        }
+
+        Token TokenizeWord()
+        {
+            var sb = new StringBuilder();
+            while (char.IsLetterOrDigit((char) stream.Peek()))
+                sb.Append((char) stream.Read());
+
+            return new Token(TokenType.Word, sb.ToString());
+        }
     }
 }

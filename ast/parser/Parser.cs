@@ -2,22 +2,29 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using algorithms_lab2.ast.lexer;
+using algorithms_lab2.runner;
 using algorithms_lab2.utils;
 
 namespace algorithms_lab2.ast.parser
 {
-    using ParserExpression = List<Token>;
-    
+    using LexerExpression = List<lexer.Token>;
+
     public class Parser
     {
-        List<Expression> expressions;
-        
-        public Parser(List<Expression> expressions) => this.expressions = expressions;
+        readonly List<LexerExpression> expressions;
 
-        public Parser(Lexer lexer) : this(lexer.Tokenize()) {}
+        public Parser(List<LexerExpression> expressions) => this.expressions = expressions;
 
-        public List<ParserExpression> Parse() => 
-            expressions.Select(expression => ParseExpression(expression.Tokens).ToList()).ToList();
+        public Parser(Lexer lexer) : this(lexer.Tokenize())
+        {
+        }
+
+        public List<Expression> Parse() =>
+            expressions
+                .Select(expression => ParseExpression(expression).ToExpression())
+                .Where(expression => expression.Tokens.Length > 0)
+                .ToList()
+                .Apply(Dump);
 
         IEnumerable<Token> ParseExpression(IReadOnlyList<lexer.Token> tokens)
         {
@@ -45,23 +52,25 @@ namespace algorithms_lab2.ast.parser
                             var name = tokens[idx].Value;
                             var args = new List<lexer.Token>();
 
-                            bool nextComma = false;
-                            for (++idx, ++idx; tokens[idx].Type != lexer.TokenType.Rparen; ++idx)
-                            {
-                                if (nextComma)
-                                {
-                                    if (tokens[idx].Type != lexer.TokenType.Comma)
-                                        throw new ArgumentException($"Expected comma, {tokens[idx]} given");
+                            idx += 2;
 
-                                    nextComma = false;
-                                    continue;
+                            var brackets = 1;
+                            while (true)
+                            {
+                                switch (tokens[idx].Type)
+                                {
+                                    case lexer.TokenType.Lparen:
+                                        brackets++;
+                                        break;
+                                    case lexer.TokenType.Rparen:
+                                        brackets--;
+                                        break;
                                 }
 
-                                if (tokens[idx].Type == lexer.TokenType.Comma)
-                                    throw new ArgumentException($"Expected argument, {tokens[idx]} given");
-
-                                tokens[idx].AddTo(args);
-                                nextComma = true;
+                                if (brackets > 0)
+                                    tokens[idx++].AddTo(args);
+                                else
+                                    break;
                             }
 
                             yield return new Token(TokenType.Function, name, ParseExpression(args.ToArray()));
@@ -76,8 +85,29 @@ namespace algorithms_lab2.ast.parser
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
+        }
 
-            // return null;
+        void Dump(List<Expression> expressions)
+        {
+            Console.WriteLine("\n\nParser:");
+            foreach (var expression in expressions)
+            {
+                foreach (var token in expression)
+                    Console.Write(token.ToString() + ' ');
+
+                Console.WriteLine();
+
+                if (!expression.ContainsEq())
+                {
+                    Console.Write(" ---> ");
+                    foreach (var token in PostfixNotation.ToPostfixNotation(expression.Tokens))
+                        Console.Write(token.ToString() + ' ');
+
+                    Console.WriteLine();
+                }
+
+                Console.WriteLine();
+            }
         }
     }
 }

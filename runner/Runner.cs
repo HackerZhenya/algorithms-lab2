@@ -3,30 +3,83 @@ using System.Collections.Generic;
 using System.Linq;
 using algorithms_lab2.ast.lexer;
 using algorithms_lab2.ast.parser;
-using Token = algorithms_lab2.ast.parser.Token;
 
 namespace algorithms_lab2.runner
 {
-    using Expression = List<Token>;
-    
     public class Runner
     {
-        public Runner(string pathToSource) : this(new Parser(new Lexer(pathToSource))) {}
+        readonly Context context = new Context();
+        readonly List<Expression> expressions;
+        readonly List<Expression> deferred = new List<Expression>();
 
-        public Runner(Parser parser) : this(parser.Parse().ToList()) {}
-
-        public Runner(List<Expression> expressions)
+        public Runner(string pathToSource) : this(new Parser(new Lexer(pathToSource)))
         {
-            Console.WriteLine("\n\n\nParser:");
+        }
+
+        public Runner(Parser parser) : this(parser.Parse())
+        {
+        }
+
+        public Runner(List<Expression> expressions) => this.expressions = expressions;
+
+        public void Run()
+        {
+            Console.WriteLine("\nRunner:");
             foreach (var expression in expressions)
             {
-                foreach (var token in expression) 
-                    Console.Write(token.ToString() + ' ');
+                if (expression.ContainsEq())
+                {
+                    var rvalue = expression.GetRvalue();
 
-                Console.WriteLine();
+                    if (rvalue.CanBeEvaluated(context))
+                    {
+                        context.Variables[expression.GetLvalue().Value] = rvalue.Evaluate(context);
+                        Console.WriteLine(
+                            $"Variable \"{expression.GetLvalue().Value}\" set to {rvalue.Evaluate(context)}");
+                    }
+                    else
+                        deferred.Add(expression);
+                }
+                else
+                {
+                    if (expression.CanBeEvaluated(context))
+                        Console.WriteLine($"Expression \"{expression}\" is {expression.Evaluate(context)}");
+                    else
+                        deferred.Add(expression);
+                }
             }
-            
-            
+
+            int last = deferred.Count;
+            while (deferred.Count > 0)
+            {
+                for (var idx = 0; idx < deferred.Count; idx++)
+                {
+                    var expression = deferred[idx];
+                    if (expression.ContainsEq())
+                    {
+                        var rvalue = expression.GetRvalue();
+
+                        if (!rvalue.CanBeEvaluated(context)) continue;
+
+                        context.Variables[expression.GetLvalue().Value] = rvalue.Evaluate(context);
+                        Console.WriteLine(
+                            $"Variable \"{expression.GetLvalue().Value}\" set to {rvalue.Evaluate(context)}");
+                        deferred.RemoveAt(idx);
+                    }
+                    else
+                    {
+                        if (!expression.CanBeEvaluated(context)) continue;
+
+                        Console.WriteLine($"Expression \"{expression}\" is {expression.Evaluate(context)}");
+                        deferred.RemoveAt(idx);
+                    }
+                }
+
+                if (deferred.Count == last)
+                    throw new Exception("Instructions cannot be followed!");
+
+                last = deferred.Count;
+            }
         }
     }
 }

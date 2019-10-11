@@ -8,15 +8,14 @@
       <e p="algorithms-lab2.sln" t="IncludeFlat" />
       <e p="ast" t="Include">
         <e p="lexer" t="Include">
-          <e p="Expression.cs" t="Include" />
           <e p="Lexer.cs" t="Include" />
           <e p="Token.cs" t="Include" />
           <e p="TokenType.cs" t="Include" />
           <e p="Utils.cs" t="Include" />
         </e>
         <e p="parser" t="Include">
-          <e p="ArgumentBag.cs" t="Include" />
           <e p="Context.cs" t="Include" />
+          <e p="Expression.cs" t="Include" />
           <e p="Parser.cs" t="Include" />
           <e p="Token.cs" t="Include" />
           <e p="TokenType.cs" t="Include" />
@@ -37,11 +36,10 @@
         <e p="Stack.cs" t="Include" />
       </e>
       <e p="tests" t="Include">
-        <e p="LexerTests.cs" t="Include" />
         <e p="StackTests.cs" t="Include" />
       </e>
       <e p="utils" t="Include">
-        <e p="Extensions.cs" t="Include" />
+        <e p="Utils.cs" t="Include" />
       </e>
     </e>
   </component>

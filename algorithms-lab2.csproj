@@ -41,13 +41,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ast\lexer\Expression.cs" />
     <Compile Include="ast\lexer\Lexer.cs" />
     <Compile Include="ast\lexer\Token.cs" />
     <Compile Include="ast\lexer\TokenType.cs" />
     <Compile Include="ast\lexer\Utils.cs" />
-    <Compile Include="ast\parser\ArgumentBag.cs" />
     <Compile Include="ast\parser\Context.cs" />
+    <Compile Include="ast\parser\Expression.cs" />
     <Compile Include="ast\parser\Parser.cs" />
     <Compile Include="ast\parser\Token.cs" />
     <Compile Include="ast\parser\TokenType.cs" />
@@ -57,9 +56,8 @@
     <Compile Include="runner\PostfixNotation.cs" />
     <Compile Include="runner\Runner.cs" />
     <Compile Include="runner\Stack.cs" />
-    <Compile Include="tests\LexerTests.cs" />
     <Compile Include="tests\StackTests.cs" />
-    <Compile Include="utils\Extensions.cs" />
+    <Compile Include="utils\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="input.txt">
