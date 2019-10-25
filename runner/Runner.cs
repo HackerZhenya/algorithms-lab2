@@ -24,7 +24,6 @@ namespace algorithms_lab2.runner
 
         public void Run()
         {
-            Console.WriteLine("\nRunner:");
             foreach (var expression in expressions)
             {
                 if (expression.ContainsEq())

@@ -10,15 +10,15 @@ namespace algorithms_lab2.ast.parser
 
         public string Value { get; }
 
-        public List<Token> Arguments { get; }
+        public Expression[] Arguments { get; }
 
-        public Token(TokenType type, string value, IEnumerable<Token> argumants = null)
+        public Token(TokenType type, string value, IEnumerable<Expression> argumants = null)
         {
             Type = type;
             Value = value;
 
             if (argumants != null)
-                Arguments = argumants.ToList();
+                Arguments = argumants.ToArray();
         }
 
         public bool CanBeEvaluated(Context ctx)
@@ -33,7 +33,7 @@ namespace algorithms_lab2.ast.parser
                     return ctx.Variables.ContainsKey(Value);
 
                 case TokenType.Function:
-                    return Arguments.All(token => token.CanBeEvaluated(ctx));
+                    return Arguments.All(arg => arg.CanBeEvaluated(ctx));
 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -61,11 +61,21 @@ namespace algorithms_lab2.ast.parser
             }
         }
 
-        public override string ToString() =>
-            Value == null
-                ? $"[{Type.ToString()}]"
-                : Type == TokenType.Function
-                    ? $"[{Type.ToString()} \"{Value}\" of{Arguments.Aggregate("", (a, b) => $"{a} {b}")}]"
-                    : $"[{Type.ToString()} \"{Value}\"]";
+        public override string ToString()
+        {
+            switch (Type)
+            {
+                case TokenType.Variable:
+                case TokenType.Constant:
+                case TokenType.Operator:
+                    return Value;
+                
+                case TokenType.Function:
+                    return $"{Value}({Arguments.Aggregate("", (a, b) => $"{a}, {b}").Substring(2)})";
+                
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
     }
 }

@@ -22,9 +22,9 @@ namespace algorithms_lab2.ast.parser
             {"ln", args => Math.Log(args[0])}
         };
 
-        public double InvokeFn(string name, IEnumerable<Token> arguments) =>
+        public double InvokeFn(string name, IEnumerable<Expression> arguments) =>
             Functions.ContainsKey(name)
-                ? Functions[name].Invoke(arguments.Select(token => token.Evaluate(this)).ToArray())
+                ? Functions[name].Invoke(arguments.Select(arg => arg.Evaluate(this)).ToArray())
                 : throw new ArgumentException($"Undefined function \"{name}\"");
     }
 }

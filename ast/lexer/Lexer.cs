@@ -18,18 +18,6 @@ namespace algorithms_lab2.ast.lexer
 
         public Lexer(Stream stream) => this.stream = new StreamReader(stream);
 
-        void Dump(List<Expression> expressions)
-        {
-            Console.WriteLine("Lexems:");
-            foreach (var expression in expressions)
-            {
-                foreach (var token in expression)
-                    Console.Write(token.ToString() + ' ');
-
-                Console.WriteLine();
-            }
-        }
-
         public List<Expression> Tokenize()
         {
             var expressions = new List<Expression>();
@@ -37,7 +25,7 @@ namespace algorithms_lab2.ast.lexer
             while (!stream.EndOfStream)
                 TokenizeExpression().AddTo(expressions);
 
-            return expressions.Apply(Dump);
+            return expressions;
         }
 
         Expression TokenizeExpression()

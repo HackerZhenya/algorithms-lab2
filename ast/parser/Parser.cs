@@ -23,8 +23,7 @@ namespace algorithms_lab2.ast.parser
             expressions
                 .Select(expression => ParseExpression(expression).ToExpression())
                 .Where(expression => expression.Tokens.Length > 0)
-                .ToList()
-                .Apply(Dump);
+                .ToList();
 
         IEnumerable<Token> ParseExpression(IReadOnlyList<lexer.Token> tokens)
         {
@@ -73,7 +72,7 @@ namespace algorithms_lab2.ast.parser
                                     break;
                             }
 
-                            yield return new Token(TokenType.Function, name, ParseExpression(args.ToArray()));
+                            yield return new Token(TokenType.Function, name, ParseArguments(args));
                         }
                         else yield return new Token(TokenType.Variable, tokens[idx].Value);
 
@@ -87,27 +86,22 @@ namespace algorithms_lab2.ast.parser
                 }
         }
 
-        void Dump(List<Expression> expressions)
+        IEnumerable<Expression> ParseArguments(IEnumerable<lexer.Token> tokens)
         {
-            Console.WriteLine("\n\nParser:");
-            foreach (var expression in expressions)
+            var expression = new List<lexer.Token>();
+
+            foreach (var token in tokens)
             {
-                foreach (var token in expression)
-                    Console.Write(token.ToString() + ' ');
-
-                Console.WriteLine();
-
-                if (!expression.ContainsEq())
+                if (token.Type != lexer.TokenType.Comma)
                 {
-                    Console.Write(" ---> ");
-                    foreach (var token in PostfixNotation.ToPostfixNotation(expression.Tokens))
-                        Console.Write(token.ToString() + ' ');
-
-                    Console.WriteLine();
+                    expression.Add(token);
+                    continue;
                 }
 
-                Console.WriteLine();
+                yield return ParseExpression(expression).ToExpression();
             }
+            
+            yield return ParseExpression(expression).ToExpression();
         }
     }
 }

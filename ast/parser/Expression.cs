@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using algorithms_lab2.runner;
 using algorithms_lab2.utils;
 
@@ -50,9 +51,14 @@ namespace algorithms_lab2.ast.parser
         public double Evaluate(Context ctx) =>
             PostfixNotation.Evaluate(ctx, PostfixNotation.ToPostfixNotation(Tokens));
 
-        public override string ToString() =>
-            Tokens.Aggregate("",
-                    (a, b) => $"{a} {(b.Type == TokenType.Function ? b.Value + $"({b.Arguments.Aggregate("", (c, d) => $"{c}, {d.Value}").Substring(2)})" : b.Value)}")
-                .Trim();
+        public override string ToString()
+        {
+            var tokens = PostfixNotation.ToPostfixNotation(Tokens);
+            var sb = new StringBuilder();
+
+            foreach (var token in tokens) sb.Append(token).Append(' ');
+
+            return sb.ToString().Replace(" )", ")");
+        }
     }
 }
